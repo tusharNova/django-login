@@ -6,42 +6,43 @@ from django.contrib.auth import authenticate , login
 from .models import *
 from django.contrib import messages
 
+# @login_required(login_url='/login/')
+def home(request):
+    return render(request, "home.html")
 
-def home(requests):
-    return render(requests, "home.html")
-
-def login(requests):
-    if requests.mothod == 'POST':
-        username = requests.POST.get('username')
-        password = requests.POST.get('password')
-
+def login(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
         if not User.objects.filter(username=username).exists():
-            messages.error(requests, "User does not exist")
+            messages.error(request, 'Invalid Username')
             return redirect('/login/')
         
-        user = authenticate(requests, username=username, password=password)
-
+        user = authenticate(username=username, password=password)
+        
         if user is None:
-            messages.error(requests , "Invalid password")
+            messages.error(request, "Invalid Password")
             return redirect('/login/')
-        else:
-            login(requests, user)
-            return redirect('/')
         
-    return render(requests, "login.html")
+        else:
+            # login(request, user)
+            
+            return redirect('/home/')
+    
+    return render(request, 'login.html')
 
 
-
-def register(requests):
-    if requests.method == "POST":
-        first_name = requests.POST.get('first_name')
-        last_name = requests.POST.get('last_name')
-        username = requests.POST.get('username')
-        password = requests.POST.get('password')
+def register(request):
+    if request.method == "POST":
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
         user = User.objects.filter(username=username)
         if user.exists():
-            messages.error(requests, "Username already taken")
+            messages.error(request, "Username already taken")
             return redirect('/register/')
         
         user = User.objects.create_user(
@@ -53,7 +54,7 @@ def register(requests):
         user.set_password(password)
         user.save()
 
-        messages.success(requests, "User registered successfully")
+        messages.success(request, "User registered successfully")
         return redirect('/login/')
     
-    return render(requests, "register.html")
+    return render(request, "register.html")
