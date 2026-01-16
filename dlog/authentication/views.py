@@ -32,4 +32,28 @@ def login(requests):
 
 
 
-# def 
+def register(requests):
+    if requests.method == "POST":
+        first_name = requests.POST.get('first_name')
+        last_name = requests.POST.get('last_name')
+        username = requests.POST.get('username')
+        password = requests.POST.get('password')
+
+        user = User.objects.filter(username=username)
+        if user.exists():
+            messages.error(requests, "Username already taken")
+            return redirect('/register/')
+        
+        user = User.objects.create_user(
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+        )
+
+        user.set_password(password)
+        user.save()
+
+        messages.success(requests, "User registered successfully")
+        return redirect('/login/')
+    
+    return render(requests, "register.html")
